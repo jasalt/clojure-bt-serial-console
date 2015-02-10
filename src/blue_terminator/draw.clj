@@ -1,3 +1,4 @@
+;; Draw ns can be reloaded easily in REPL 
 (ns blue-terminator.draw
   (:require [quil.core :as q]))
 
@@ -17,6 +18,5 @@
       (q/ellipse x y 100 100))))
 
 (defn update-state [state]
-                                        ; Update sketch state by changing circle color and position.
   {:color (mod (+ (:color state) 0.7) 255)
-   :angle (+ (:angle state) 0.1)})
+   :angle (+ (:angle state) 0.1)}) 
