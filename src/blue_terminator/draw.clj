@@ -2,21 +2,35 @@
 (ns blue-terminator.draw
   (:require [quil.core :as q]))
 
+(defn random-fill []
+  (q/fill (q/random 255) (q/random 255) (q/random 255))
+  )
+
+(defn draw-bar [bar-x-pos, height]
+  (random-fill)
+  (let [bottom-pos 300
+        draw-height (* 10 height)
+        bar-y-pos (- bottom-pos draw-height)]
+    (q/rect bar-x-pos bar-y-pos 30 draw-height)
+    )
+  )
+
+(defn draw-bars [state]
+  (draw-bar 100 (state :left-sensor))
+  (draw-bar 200 (state :front-sensor))
+  (draw-bar 300 (state :right-sensor))
+  )
+
 (defn draw-state [state]
   ;; Clear the sketch by filling it with light-grey color.
   (q/background 240)
-  ;; Set circle color.
-  (q/fill (:color state) 255 255)
-  ;; Calculate x and y coordinates of the circle.
-  (let [angle (:angle state)
-        x (* 150 (q/cos angle))
-        y (* 150 (q/sin angle))]
-    ;; Move origin point to the center of the sketch.
-    (q/with-translation [(/ (q/width) 2)
-                         (/ (q/height) 2)]
-      ;; Draw the circle.
-      (q/ellipse x y 100 100))))
+  (draw-bars state)
+  )
 
 (defn update-state [state]
-  {:color (mod (+ (:color state) 0.7) 255)
-   :angle (+ (:angle state) 0.1)}) 
+  {:left-sensor (q/random 10)
+   :right-sensor (q/random 10)
+   :front-sensor (q/random 10)
+   :robot-state "unknown"
+   }
+  ) 
