@@ -5,40 +5,25 @@
    [serial.util :refer [list-ports]]
    ))
 
+;; Cheatsheet (TODO ascii-converter-function)
+;; 60 is <
+;; 58 is :
+;; 62 is >
+
 (defn parse-messages
   "Listen given channel for input bytes,
   parse them (todo) and put commands to result-channel."
   ([c]
    (let [result-chan (chan)]
-     (go
-       ;; 60 is <
-       ;; 58 is :
-       ;; 62 is >
-       (loop []
-         ;; Take message fnrom channel
-         (let [received-byte (<! c)]  ;; Type, expected to be 0x04 (Event)
-
-           (>! result-chan received-byte)
-           (recur)
-           )
-         )
-       )
+     (go (loop [byte (<! c) result []]
+           (cond
+             (== byte 60) (do (println "< byte")
+                              (recur (<! c) []))
+             (== byte 62) (do (println "> byte")
+                              (>! result-chan result)
+                              (recur (<! c) []))
+             :else (recur (<! c) (conj result byte)))))
      result-chan)))
-;;TODO
-;; (->>
-;;  (loop [read-byte (<! c)
-;;         result []]
-
-;;    (when (== 62 read-byte)
-;;      result
-;;      (recur (<! c)
-;;             (conj result read-byte))
-;;      ;;(println (str "Skipping byte: " (received-byte))) (recur))
-;;      )
-;;    )
-;;  (>! result-chan)
-;;  )
-
 
 (defn print-messages
   "Prints incoming messages type from from-chan."
@@ -46,26 +31,20 @@
    (go
      (loop []
        (let [byte (<! from-chan)]
-         (println (str "Got: " byte))
-         )
+         (println (str "Got: " byte)))
        (recur)))))
 
 (defn receive-fn [serial-input-chan]
   "Reads input bytes and puts them to queue."
   (fn [b]
-    (>!! serial-input-chan (.read b)))
-  )
+    (>!! serial-input-chan (.read b))))
 
 (defn initialize-serial []
-  (defonce port (serial/open "ttyACM0" :baud-rate 9600))
-
+  (defonce port (serial/open "ttyACM1" :baud-rate 9600))
   (def serial-input-chan (chan))
-
   (def pchan (print-messages (parse-messages serial-input-chan)))
   (def rfn (receive-fn serial-input-chan))
-  (serial/listen port rfn nil)
-  )
+  (serial/listen port rfn nil))
 
 (defn cleanup [port]
-  (serial/remove-listener port)
-  )
+  (serial/remove-listener port))
