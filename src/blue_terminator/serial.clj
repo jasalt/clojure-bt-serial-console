@@ -6,17 +6,39 @@
    ))
 
 (defn parse-messages
-  "Listen given channel for input bytes, 
+  "Listen given channel for input bytes,
   parse them (todo) and put commands to result-channel."
   ([c]
    (let [result-chan (chan)]
-     (go (loop []
-           ;; Take message fnrom channel
-           (let [received-byte (<! c)]  ;; Type, expected to be 0x04 (Event)
-             (>! result-chan received-byte)
-             (recur)
-             )))
+     (go
+       ;; 60 is <
+       ;; 58 is :
+       ;; 62 is >
+       (loop []
+         ;; Take message fnrom channel
+         (let [received-byte (<! c)]  ;; Type, expected to be 0x04 (Event)
+
+           (>! result-chan received-byte)
+           (recur)
+           )
+         )
+       )
      result-chan)))
+;;TODO
+;; (->>
+;;  (loop [read-byte (<! c)
+;;         result []]
+
+;;    (when (== 62 read-byte)
+;;      result
+;;      (recur (<! c)
+;;             (conj result read-byte))
+;;      ;;(println (str "Skipping byte: " (received-byte))) (recur))
+;;      )
+;;    )
+;;  (>! result-chan)
+;;  )
+
 
 (defn print-messages
   "Prints incoming messages type from from-chan."
@@ -36,9 +58,9 @@
 
 (defn initialize-serial []
   (defonce port (serial/open "ttyACM0" :baud-rate 9600))
-  
+
   (def serial-input-chan (chan))
-  
+
   (def pchan (print-messages (parse-messages serial-input-chan)))
   (def rfn (receive-fn serial-input-chan))
   (serial/listen port rfn nil)
