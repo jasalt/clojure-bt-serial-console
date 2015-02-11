@@ -7,6 +7,7 @@
                     :right-sensor 0.0
                     :front-sensor 0.0
                     :robot-state "unknown"
+                    :autopilot nil
                     })
 
 (defn setup []
