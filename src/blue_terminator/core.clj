@@ -1,7 +1,11 @@
 (ns blue-terminator.core
   (:require [quil.core :as q]
             [quil.middleware :as m]
-            [blue-terminator.draw :as d]))
+            [blue-terminator.draw :as d]
+            [blue-terminator.serial :as connection]
+            ))
+
+
 
 (def initial-state {:left-sensor 0.0
                     :right-sensor 0.0
@@ -11,12 +15,12 @@
                     })
 
 (defn setup []
+  (q/smooth)
   (q/frame-rate 10)
   ;; Set color mode to HSB (HSV) instead of default RGB.
   (q/color-mode :hsb)
   ;;  initial state
-  {:color 0
-   :angle 0}
+  (connection/initialize-serial)
   initial-state)
 
 (q/defsketch blue-terminator

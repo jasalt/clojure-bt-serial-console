@@ -1,6 +1,8 @@
 ;; Draw ns can be reloaded easily in REPL 
 (ns blue-terminator.draw
-  (:require [quil.core :as q]))
+  (:require [quil.core :as q]
+            [blue-terminator.serial :refer [sensor-state]]
+            ))
 
 (defn random-fill []
   (q/fill (q/random 255) (q/random 255) (q/random 255))
@@ -19,12 +21,17 @@
   (draw-bar 100 (state :left-sensor))
   (draw-bar 200 (state :front-sensor))
   (draw-bar 300 (state :right-sensor))
+  
   )
 
 (defn draw-state [state]
   ;; Clear the sketch by filling it with light-grey color.
   (q/background 240)
   (draw-bars state)
+  (q/text-font (q/create-font "DejaVu Sans" 20 true))
+  (q/text (str @sensor-state)
+          0   ; x
+          100)  ; y
   )
 
 (defn update-state [state]
