@@ -5,24 +5,25 @@
    [serial.util :refer [list-ports]]
    ))
 
-;; Cheatsheet (TODO ascii-converter-function)
-;; 60 is <
-;; 58 is :
-;; 62 is >
-
 (defn parse-messages
-  "Listen given channel for input bytes,
-  parse them (todo) and put commands to result-channel."
+  "Listen channel for serial commands in form `<S:12:23:22>',
+  parse them and push to result-channel."
   ([c]
    (let [result-chan (chan)]
-     (go (loop [byte (<! c) result []]
+     (go (loop [byte (<! c)
+                result [] buffer []]
+
            (cond
-             (== byte 60) (do (println "< byte")
-                              (recur (<! c) []))
-             (== byte 62) (do (println "> byte")
-                              (>! result-chan result)
-                              (recur (<! c) []))
-             :else (recur (<! c) (conj result byte)))))
+             (== byte (int \<)) (do (recur (<! c) [] []))
+             (== byte (int \:)) (do (recur (<! c)
+                                           (conj result buffer) []))
+             (== byte (int \>))
+             (let [cmd-val (first result)
+                   vals (rest (conj result buffer))]
+               (>! result-chan {:cmd cmd-val :vals vals})
+               (recur (<! c) [] []))
+
+             :else (recur (<! c) result (conj buffer (char byte))))))
      result-chan)))
 
 (defn print-messages
@@ -40,7 +41,7 @@
     (>!! serial-input-chan (.read b))))
 
 (defn initialize-serial []
-  (defonce port (serial/open "ttyACM1" :baud-rate 9600))
+  (def port (serial/open "ttyACM0" :baud-rate 9600))
   (def serial-input-chan (chan))
   (def pchan (print-messages (parse-messages serial-input-chan)))
   (def rfn (receive-fn serial-input-chan))
