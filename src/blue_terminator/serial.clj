@@ -45,11 +45,14 @@
     (>!! serial-input-chan (.read b))))
 
 (defn initialize-serial []
-  (def port (serial/open "ttyACM0" :baud-rate 9600))
+  ;; TODO read and set port automagically
+  (def port (serial/open "cu.usbmodemfa131" :baud-rate 9600))
   (def serial-input-chan (chan))
   (def pchan (print-messages (parse-messages serial-input-chan)))
   (def rfn (receive-fn serial-input-chan))
   (serial/listen port rfn nil))
 
 (defn cleanup [port]
-  (serial/remove-listener port))
+  (serial/remove-listener port)
+  (serial/close port)
+  )
