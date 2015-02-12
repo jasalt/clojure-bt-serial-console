@@ -44,13 +44,19 @@
   (fn [b]
     (>!! serial-input-chan (.read b))))
 
+(defn send-command [port command]
+  "Sends command to serial port."
+  ;; TODO: this probably doesn't work
+  (serial/write port command))
+
 (defn initialize-serial []
   ;; TODO read and set port automagically
   (def port (serial/open "cu.usbmodemfa131" :baud-rate 9600))
   (def serial-input-chan (chan))
   (def pchan (print-messages (parse-messages serial-input-chan)))
   (def rfn (receive-fn serial-input-chan))
-  (serial/listen port rfn nil))
+  (serial/listen port rfn nil)
+  port)
 
 (defn cleanup [port]
   (serial/remove-listener port)
