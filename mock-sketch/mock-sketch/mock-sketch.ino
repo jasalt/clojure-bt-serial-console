@@ -19,13 +19,13 @@ void loop()
 
 void establishContact() {
   while (Serial.available() <= 0) {
-    Serial.write("<S:");
-    Serial.write(random(100, 999));
-    Serial.write(":");
-    Serial.write(random(100, 999));
-    Serial.write(":");
-    Serial.write(random(100, 999));
+    Serial.print("<S:");
+    Serial.print(random(100, 999));
+    Serial.print(":");
+    Serial.print(random(100, 999));
+    Serial.print(":");
+    Serial.print(random(100, 999));
     Serial.println(">");
-    delay(random(20,100));
+    delay(100);
   }
 }
