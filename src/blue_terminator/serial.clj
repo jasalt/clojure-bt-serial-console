@@ -5,6 +5,8 @@
    [serial.util :refer [list-ports]]
    ))
 
+(def sensor-state (atom {}))
+
 (defn parse-messages
   "Listen channel for serial commands in form `<S:12:23:22>',
   parse them and push to result-channel."
@@ -31,8 +33,10 @@
   ([from-chan]
    (go
      (loop []
-       (let [byte (<! from-chan)]
-         (println (str "Got: " byte)))
+       (let [sensor-readings (<! from-chan)]
+         (println (str "Got: " sensor-readings))
+         (reset! sensor-state sensor-readings)
+         )
        (recur)))))
 
 (defn receive-fn [serial-input-chan]
