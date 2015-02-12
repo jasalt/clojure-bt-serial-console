@@ -16,10 +16,10 @@
            (cond
              (== byte (int \<)) (do (recur (<! c) [] []))
              (== byte (int \:)) (do (recur (<! c)
-                                           (conj result buffer) []))
+                                           (conj result (apply str buffer)) []))
              (== byte (int \>))
              (let [cmd-val (first result)
-                   vals (rest (conj result buffer))]
+                   vals (rest (conj result (apply str buffer)))]
                (>! result-chan {:cmd cmd-val :vals vals})
                (recur (<! c) [] []))
 
